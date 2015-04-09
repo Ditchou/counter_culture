@@ -97,7 +97,8 @@ module CounterCulture
 
           # respect the deleted_at column if it exists
           query = query.where("#{self.table_name}.deleted_at IS NULL") if self.column_names.include?('deleted_at')
-
+          query = query.where("#{self.table_name}.disabled_at IS NULL") if self.column_names.include?('disabled_at')
+          
           column_names = hash[:column_names] || {nil => hash[:counter_cache_name]}
           raise ":column_names must be a Hash of conditions and column names" unless column_names.is_a?(Hash)
 
