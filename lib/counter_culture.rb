@@ -124,7 +124,7 @@ module CounterCulture
           # iterate over all the possible counter cache column names
           column_names.each do |where, column_name|
             # select join column and count (from above) as well as cache column ('column_name') for later comparison
-            counts_query = query.select("#{klass.table_name}.#{klass.primary_key}, #{klass.table_name}.#{relation_reflect(hash[:relation]).association_primary_key}, #{count_select} AS count, #{klass.table_name}.#{column_name}")
+            counts_query = query.select("#{klass.table_name}.#{klass.primary_key}, #{klass.table_name}.#{relation_reflect(hash[:relation]).association_primary_key}, #{count_select} AS count")
 
             # we need to join together tables until we get back to the table this class itself lives in
             # conditions must also be applied to the join on which we are counting
@@ -142,19 +142,17 @@ module CounterCulture
               # now iterate over all the models and see whether their counts are right
               records.each do |model|
                 count = model.read_attribute('count') || 0
-                if model.read_attribute(column_name) != count
-                  # keep track of what we fixed, e.g. for a notification email
-                  fixed<< {
-                    :entity => klass.name,
-                    klass.primary_key.to_sym => model.send(klass.primary_key),
-                    :what => column_name,
-                    :wrong => model.send(column_name),
-                    :right => count
-                  }
-                  # use update_all because it's faster and because a fixed counter-cache shouldn't
-                  # update the timestamp
-                  klass.where(klass.primary_key => model.send(klass.primary_key)).update_all(column_name => count)
-                end
+                # keep track of what we fixed, e.g. for a notification email
+                fixed<< {
+                  :entity => klass.name,
+                  klass.primary_key.to_sym => model.send(klass.primary_key),
+                  :what => column_name,
+                  :wrong => model.send(column_name),
+                  :right => count
+                }
+                # use update_all because it's faster and because a fixed counter-cache shouldn't
+                # update the timestamp
+                klass.where(klass.primary_key => model.send(klass.primary_key)).update_all(column_name => count)
               end
 
               start += batch_size
