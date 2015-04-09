@@ -147,7 +147,6 @@ module CounterCulture
                   :entity => klass.name,
                   klass.primary_key.to_sym => model.send(klass.primary_key),
                   :what => column_name,
-                  :wrong => model.send(column_name),
                   :right => count
                 }
                 # use update_all because it's faster and because a fixed counter-cache shouldn't
